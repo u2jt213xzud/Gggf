@@ -1,0 +1,125 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Gymmer Simulator 3D</title>
+    <style>
+        body { margin: 0; overflow: hidden; font-family: Arial, sans-serif; }
+        canvas { display: block; }
+        .menu {
+            position: absolute;
+            top: 10px;
+            left: 10px;
+            z-index: 10;
+        }
+        button {
+            padding: 10px 20px;
+            margin: 5px;
+            font-size: 16px;
+            cursor: pointer;
+        }
+    </style>
+</head>
+<body>
+    <div class="menu">
+        <button onclick="goToGym()">Phòng Gym</button>
+        <button onclick="goToKitchen()">Nhà Bếp</button>
+        <button onclick="goToCompetition()">Sàn Thi Đấu</button>
+    </div>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/three/examples/js/loaders/GLTFLoader.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/three/examples/js/controls/OrbitControls.js"></script>
+    <script>
+        // Khởi tạo Three.js
+        const scene = new THREE.Scene();
+        const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
+        const renderer = new THREE.WebGLRenderer();
+        renderer.setSize(window.innerWidth, window.innerHeight);
+        document.body.appendChild(renderer.domElement);
+
+        // Ánh sáng
+        const light = new THREE.DirectionalLight(0xffffff, 1);
+        light.position.set(5, 5, 5);
+        scene.add(light);
+
+        // Mô hình nhân vật
+        const loader = new THREE.GLTFLoader();
+        let model;
+        loader.load('model/character.glb', function (gltf) {
+            model = gltf.scene;
+            model.scale.set(2, 2, 2); // Kích thước nhân vật
+            scene.add(model);
+        });
+
+        // Các cảnh
+        let sceneType = "gym";
+
+        function updateScene() {
+            scene.clear(); // Xóa cảnh hiện tại
+            if (sceneType === "gym") {
+                // Thêm không gian phòng gym
+                scene.background = new THREE.Color(0xaaaaaa); // Màu phòng gym
+                const gymEquipment = new THREE.BoxGeometry(1, 0.5, 0.5); // Dụng cụ tạ
+                const gymMaterial = new THREE.MeshBasicMaterial({ color: 0x00ff00 });
+                const gymMesh = new THREE.Mesh(gymEquipment, gymMaterial);
+                gymMesh.position.set(0, 0.25, 0);
+                scene.add(gymMesh);
+            } else if (sceneType === "kitchen") {
+                // Thêm không gian nhà bếp
+                scene.background = new THREE.Color(0xffccaa); // Màu nhà bếp
+                const table = new THREE.BoxGeometry(2, 0.1, 1); // Bàn bếp
+                const tableMaterial = new THREE.MeshBasicMaterial({ color: 0x8b4513 });
+                const tableMesh = new THREE.Mesh(table, tableMaterial);
+                tableMesh.position.set(0, 0.5, 0);
+                scene.add(tableMesh);
+            } else if (sceneType === "competition") {
+                // Thêm không gian sàn đấu
+                scene.background = new THREE.Color(0xffffaa); // Màu sàn đấu
+                const stage = new THREE.BoxGeometry(3, 0.1, 2); // Sân khấu
+                const stageMaterial = new THREE.MeshBasicMaterial({ color: 0xff0000 });
+                const stageMesh = new THREE.Mesh(stage, stageMaterial);
+                stageMesh.position.set(0, 0.1, 0);
+                scene.add(stageMesh);
+            }
+        }
+
+        // Chuyển đổi cảnh
+        function goToGym() {
+            sceneType = "gym";
+            updateScene();
+        }
+
+        function goToKitchen() {
+            sceneType = "kitchen";
+            updateScene();
+        }
+
+        function goToCompetition() {
+            sceneType = "competition";
+            updateScene();
+        }
+
+        // Camera
+        const controls = new THREE.OrbitControls(camera, renderer.domElement);
+        camera.position.set(0, 2, 5);
+        controls.update();
+
+        // Vòng lặp
+        function animate() {
+            requestAnimationFrame(animate);
+            controls.update();
+            renderer.render(scene, camera);
+        }
+
+        animate();
+
+        // Xử lý thay đổi kích thước
+        window.addEventListener('resize', () => {
+            camera.aspect = window.innerWidth / window.innerHeight;
+            camera.updateProjectionMatrix();
+            renderer.setSize(window.innerWidth, window.innerHeight);
+        });
+    </script>
+</body>
+</html>
